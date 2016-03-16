@@ -33,6 +33,8 @@ Performed on a i7-2600K CPU @ 3.40GHz with 24GiB of RAM, and `GOMAXPROCS` = 8
 
 #Notes#
 
+This is an important caveat: this set structure is **NOT** performant for sets that have more than 150+ elements. It works best with small sets.
+
 ##API Differences ##
 The API for smallsets are not the same as the API for the [default `gen` implementaion](https://github.com/clipperhouse/set) of sets. The reason is since this set is slice backed, I thought it'd be wise to reuse the slice semantics. Consider the following:
 
@@ -53,7 +55,7 @@ The `TagValue` is hacked to allow custom equality methods. See To Use below.
 
 #To Use#
 
-The gen annotation syntax is ratherstandard: 
+The gen annotation syntax is rather standard: 
 
 ```// +gen [*] tag:"Value, Value[T,T]" anothertag```
 
@@ -94,7 +96,7 @@ If you do this (note the `EQ`):
 type MyStruct struct{}
 ```
 
-This code will be generated:
+This code will be generated (note that `.EQ(want)` is now the method):
 
 ```go
 func (set MyStructSet) Contains(want MyStruct) bool {
@@ -106,5 +108,18 @@ func (set MyStructSet) Contains(want MyStruct) bool {
 	return false
 }
 ```
+
+If no values are passed in, the default equality comparator (`==`) is used, generating code that looks like this:
+```go
+func (set MyStructSet) Contains(want MyStruct) bool {
+	for _, v := range set {
+		if v == want {
+			return true
+		}
+	}
+	return false
+}
+```
+
 
 Now obviously this is quite janky and hacky. But it works for now. Feel free to send a pull request if you want to fix this
