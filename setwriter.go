@@ -15,7 +15,7 @@ func init() {
 	}
 }
 
-// this struct is here to allow for extras that may be passed into the templates.
+// TypePlusPlus extends typewriter.Type as the templates do require extra information
 type TypePlusPlus struct {
 	typewriter.Type
 	EqFn string

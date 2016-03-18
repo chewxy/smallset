@@ -28,7 +28,7 @@ const basic = `
 //{{.Name}}Set is a set of {{.Pointer}}{{.Name}}
 type {{.Name}}Set []{{.Pointer}}{{.Name}}
 
-// New{{.Name}}Set does what it says on the tin
+// New{{.Name}}Set creates a new set of {{.Pointer}}{{.Name}}, given an input of any {{.Pointer}}{{.Name}}
 func New{{.Name}}Set(a ...{{.Pointer}}{{.Name}}) {{.Name}}Set {
 	var set {{.Name}}Set
 
@@ -46,7 +46,7 @@ func (set {{.Name}}Set) ToSlice() []{{.Pointer}}{{.Name}} {
 
 
 
-// Determines if items are already in set
+// ContainsALl determines if all the wanted items are already in set
 func (set {{.Name}}Set) ContainsAll(ws ...{{.Pointer}}{{.Name}}) bool {
 	for _, w := range ws {
 		if !set.Contains(w) {
@@ -56,7 +56,7 @@ func (set {{.Name}}Set) ContainsAll(ws ...{{.Pointer}}{{.Name}}) bool {
 	return true
 }
 
-// Add... ditto
+// Add adds an item into the set, and then returns a new set. If the item already exists, it returns the current set
 func (set {{.Name}}Set) Add(item {{.Pointer}}{{.Name}}) {{.Name}}Set {
 	if set.Contains(item) {
 		return set
@@ -65,7 +65,7 @@ func (set {{.Name}}Set) Add(item {{.Pointer}}{{.Name}}) {{.Name}}Set {
 	return set
 }
 
-//Is the other set a subset of this set?
+// IsSubSetOf checks if the current set is a subset of the other set.
 func (set {{.Name}}Set) IsSubsetOf(other {{.Name}}Set) bool {
 	if len(set) > len(other) {
 		return false
@@ -80,12 +80,12 @@ func (set {{.Name}}Set) IsSubsetOf(other {{.Name}}Set) bool {
 	return true
 }
 
-// Is the other set a super set of this set?
+// IsSupersetOf checks if the current set is a superset of the other set
 func (set {{.Name}}Set) IsSupersetOf(other {{.Name}}Set) bool {
 	return other.IsSubsetOf(set)
 }
 
-// Intersect
+// Intersect performs an intersection between two sets - only items that exist in both are returned
 func (set {{.Name}}Set) Intersect(other {{.Name}}Set) {{.Name}}Set {
 	retVal := make({{.Name}}Set, 0)
 	for _, o := range other {
@@ -96,7 +96,7 @@ func (set {{.Name}}Set) Intersect(other {{.Name}}Set) {{.Name}}Set {
 	return retVal
 }
 
-//Union
+//Union joins both sets together, keeping only unique items
 func (set {{.Name}}Set) Union(other {{.Name}}Set) {{.Name}}Set {
 	retVal := make({{.Name}}Set, len(set))
 	copy(retVal, set)
@@ -108,7 +108,7 @@ func (set {{.Name}}Set) Union(other {{.Name}}Set) {{.Name}}Set {
 	return retVal
 }
 
-// Returns a new set with items in the current set but not in the other set. 
+// Difference returns a new set with items in the current set but not in the other set. 
 // Equivalent to  (set - other)
 func (set {{.Name}}Set) Difference(other {{.Name}}Set) {{.Name}}Set {
 	retVal := make({{.Name}}Set, 0)
@@ -120,14 +120,14 @@ func (set {{.Name}}Set) Difference(other {{.Name}}Set) {{.Name}}Set {
 	return retVal
 }
 
-// Equivalent to 
+// SymmetricDifference is the set of items that is not in each either set.
 func (set {{.Name}}Set) SymmetricDifference(other {{.Name}}Set) {{.Name}}Set {
 	aDiff := set.Difference(other)
 	bDiff := other.Difference(set)
 	return aDiff.Union(bDiff)
 }
 
-// Equality... does what it says on the tin
+// Equals compares two sets and checks if it is the same
 func (set {{.Name}}Set) Equals(other {{.Name}}Set) bool {
 	if len(set) != len(other) {
 		return false
@@ -158,7 +158,7 @@ func (set {{.Name}}Set) String() string {
 }
 `
 
-const defaultEqTempl = `// Determines if an item is in the set already
+const defaultEqTempl = `// Contains determines if an item is in the set already
 func (set {{.Name}}Set) Contains(w {{.Pointer}}{{.Name}}) bool {
 	for _, v := range set {
 		if v == w {
@@ -169,7 +169,7 @@ func (set {{.Name}}Set) Contains(w {{.Pointer}}{{.Name}}) bool {
 }
 `
 
-const customEqTempl = `// Determines if an item is in the set already
+const customEqTempl = `// Contains determines if an item is in the set already. This method uses a custom equality method
 func (set {{.Name}}Set) Contains(w {{.Pointer}}{{.Name}}) bool {
 	for _, v := range set {
 		if v.{{.EqFn}}(w) {
