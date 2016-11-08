@@ -36,7 +36,7 @@ SOFTWARE.
 //ThingSet is a set of Thing
 type ThingSet []Thing
 
-// NewThingSet does what it says on the tin
+// NewThingSet creates a new set of Thing, given an input of any Thing
 func NewThingSet(a ...Thing) ThingSet {
 	var set ThingSet
 
@@ -52,7 +52,7 @@ func (set ThingSet) ToSlice() []Thing {
 	return []Thing(set)
 }
 
-// Determines if items are already in set
+// ContainsAll determines if all the wanted items are already in set
 func (set ThingSet) ContainsAll(ws ...Thing) bool {
 	for _, w := range ws {
 		if !set.Contains(w) {
@@ -62,7 +62,7 @@ func (set ThingSet) ContainsAll(ws ...Thing) bool {
 	return true
 }
 
-// Add... ditto
+// Add adds an item into the set, and then returns a new set. If the item already exists, it returns the current set
 func (set ThingSet) Add(item Thing) ThingSet {
 	if set.Contains(item) {
 		return set
@@ -71,7 +71,7 @@ func (set ThingSet) Add(item Thing) ThingSet {
 	return set
 }
 
-//Is the other set a subset of this set?
+// IsSubSetOf checks if the current set is a subset of the other set.
 func (set ThingSet) IsSubsetOf(other ThingSet) bool {
 	if len(set) > len(other) {
 		return false
@@ -86,38 +86,55 @@ func (set ThingSet) IsSubsetOf(other ThingSet) bool {
 	return true
 }
 
-// Is the other set a super set of this set?
+// IsSupersetOf checks if the current set is a superset of the other set
 func (set ThingSet) IsSupersetOf(other ThingSet) bool {
 	return other.IsSubsetOf(set)
 }
 
-// Intersect
+// Intersect performs an intersection between two sets - only items that exist in both are returned
 func (set ThingSet) Intersect(other ThingSet) ThingSet {
-	retVal := make(ThingSet, 0)
-	for _, o := range other {
-		if set.Contains(o) {
-			retVal = append(retVal, o)
+	switch {
+	case len(set) == 0 && len(other) == 0:
+		return nil
+	case len(set) == 0 && len(other) > 0:
+		return other
+	case len(set) > 0 && len(other) == 0:
+		return set
+	default:
+		retVal := make(ThingSet, 0)
+		for _, o := range other {
+			if set.Contains(o) {
+				retVal = append(retVal, o)
+			}
 		}
+		return retVal
 	}
-	return retVal
 }
 
-//Union
+//Union joins both sets together, keeping only unique items
 func (set ThingSet) Union(other ThingSet) ThingSet {
-	retVal := make(ThingSet, len(set))
-	copy(retVal, set)
-	for _, o := range other {
-		if !retVal.Contains(o) {
-			retVal = append(retVal, o)
+	switch {
+	case len(set) == 0 && len(other) == 0:
+		return nil
+	case len(set) == 0 && len(other) > 0:
+		return other
+	case len(set) > 0 && len(other) == 0:
+		return set
+	default:
+		retVal := make(ThingSet, len(set))
+		copy(retVal, set)
+		for _, o := range other {
+			if !retVal.Contains(o) {
+				retVal = append(retVal, o)
+			}
 		}
+		return retVal
 	}
-	return retVal
 }
 
-// Returns a new set with items in the current set but not in the other set.
+// Difference returns a new set with items in the current set but not in the other set.
 // Equivalent to  (set - other)
-func (set ThingSet) Difference(other ThingSet) ThingSet {
-	retVal := make(ThingSet, 0)
+func (set ThingSet) Difference(other ThingSet) (retVal ThingSet) {
 	for _, v := range set {
 		if !other.Contains(v) {
 			retVal = append(retVal, v)
@@ -126,14 +143,14 @@ func (set ThingSet) Difference(other ThingSet) ThingSet {
 	return retVal
 }
 
-// Equivalent to
+// SymmetricDifference is the set of items that is not in each either set.
 func (set ThingSet) SymmetricDifference(other ThingSet) ThingSet {
 	aDiff := set.Difference(other)
 	bDiff := other.Difference(set)
 	return aDiff.Union(bDiff)
 }
 
-// Equality... does what it says on the tin
+// Equals compares two sets and checks if it is the same
 func (set ThingSet) Equals(other ThingSet) bool {
 	if len(set) != len(other) {
 		return false
@@ -163,7 +180,7 @@ func (set ThingSet) String() string {
 	return buf.String()
 }
 
-// Determines if an item is in the set already
+// Contains determines if an item is in the set already
 func (set ThingSet) Contains(w Thing) bool {
 	for _, v := range set {
 		if v == w {

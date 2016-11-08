@@ -3,37 +3,50 @@ A fast slice-backed set generator for small sets in Go.  Use with [`gen`](https:
 
 #Why?#
 
-There exists already fairly decent set implementations (the [default `gen` implementaion](https://github.com/clipperhouse/set) is one). So why something so simple? It turns out after some benchmark and performance analysis, I discovered that I had many small sets, each with fewer than 100 elements in them. A `map` based set would take quite a bit longer than a slice based set.
+There exists already fairly decent set implementations (the [default `gen` implementaion](https://github.com/clipperhouse/set) is one). So why something so simple? It turns out after some benchmark and performance analysis, I discovered that I had many small sets, each with fewer than 50 elements in them. A `map` based set would take quite a bit longer than a slice based set.
 
 Here are some quick and dirty benchmarks:
 
 ```
+BenchmarkThingSet_Contains1-8         	300000000	         4.90 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Contains10-8        	30000000	        59.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Contains50-8        	 2000000	       980 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Contains100-8       	  500000	      3483 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Contains1000-8      	    5000	    280934 ns/op	       4 B/op	       0 allocs/op
+BenchmarkThingSet_Contains10000-8     	      50	  27922636 ns/op	    9354 B/op	       0 allocs/op
+BenchmarkThingSet_Contains100000-8    	       1	5465854463 ns/op	 5459936 B/op	      48 allocs/op
+BenchmarkThangSet_Contains1-8         	200000000	         7.07 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThangSet_Contains10-8        	10000000	       148 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThangSet_Contains50-8        	 2000000	       819 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThangSet_Contains100-8       	 1000000	      1634 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThangSet_Contains1000-8      	  100000	     22320 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThangSet_Contains10000-8     	    5000	    281176 ns/op	      92 B/op	       0 allocs/op
+BenchmarkThangSet_Contains100000-8    	     500	   3463190 ns/op	    8122 B/op	      12 allocs/op
+
+BenchmarkThingSet_Intersect1-8        	100000000	        16.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect10-8       	20000000	        67.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect50-8       	 2000000	       982 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect100-8      	  500000	      3298 ns/op	       0 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect1000-8     	    5000	    279414 ns/op	       7 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect10000-8    	      50	  28132173 ns/op	   13301 B/op	       0 allocs/op
+BenchmarkThingSet_Intersect100000-8   	       1	6217674098 ns/op	 8160768 B/op	      59 allocs/op
+BenchmarkThangSet_Intersect1-8        	10000000	       213 ns/op	      48 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect10-8       	 5000000	       363 ns/op	      48 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect50-8       	 1000000	      1118 ns/op	      48 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect100-8      	 1000000	      2190 ns/op	      48 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect1000-8     	  100000	     19856 ns/op	      48 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect10000-8    	   10000	    203680 ns/op	     117 B/op	       1 allocs/op
+BenchmarkThangSet_Intersect100000-8   	     500	   2343606 ns/op	   12252 B/op	      19 allocs/op
 PASS
-BenchmarkSmallSet1-8    	200000000	         8.31 ns/op
-BenchmarkSmallSet5-8    	30000000	        40.9 ns/op
-BenchmarkSmallSet10-8   	10000000	       114 ns/op
-BenchmarkSmallSet50-8   	 1000000	      1649 ns/op
-BenchmarkSmallSet100-8  	  300000	      4839 ns/op
-BenchmarkSmallSet500-8  	   20000	     79464 ns/op
-BenchmarkSmallSet1000-8 	    5000	    293561 ns/op
-BenchmarkSmallSet5000-8 	     200	   7172039 ns/op
-BenchmarkSmallSet10000-8	      50	  28184651 ns/op
-BenchmarkSet1-8         	30000000	        35.2 ns/op
-BenchmarkSet5-8         	10000000	       197 ns/op
-BenchmarkSet10-8        	 3000000	       480 ns/op
-BenchmarkSet50-8        	  500000	      2579 ns/op
-BenchmarkSet100-8       	  300000	      5202 ns/op
-BenchmarkSet500-8       	   50000	     27204 ns/op
-BenchmarkSet1000-8      	   30000	     55601 ns/op
-BenchmarkSet5000-8      	    5000	    292904 ns/op
-BenchmarkSet10000-8     	    2000	    590174 ns/op
+ok  	github.com/chewxy/smallset/test	62.084s
+
 ```
 
 Performed on a i7-2600K CPU @ 3.40GHz with 24GiB of RAM, and `GOMAXPROCS` = 8
 
 #Notes#
 
-This is an important caveat: this set structure is **NOT** performant for sets that have more than 150+ elements. It works best with small sets.
+This is an important caveat: this set structure is **NOT** performant for sets that have more than 150+ elements. It works best with small sets (<= 100 items).
 
 ##API Differences ##
 The API for smallsets are not the same as the API for the [default `gen` implementaion](https://github.com/clipperhouse/set) of sets. The reason is since this set is slice backed, I thought it'd be wise to reuse the slice semantics. Consider the following:

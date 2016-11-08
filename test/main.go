@@ -3,6 +3,7 @@ package main
 // +gen smallset
 type Thing int
 
-func main() {
+// +gen set
+type Thang int
 
-}
+func main() {}
